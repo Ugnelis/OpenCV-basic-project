@@ -9,16 +9,14 @@ import javafx.scene.control.Button;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.stage.FileChooser;
-import org.opencv.core.Core;
-import org.opencv.core.CvType;
-import org.opencv.core.Mat;
+import org.opencv.core.*;
 import org.opencv.imgproc.Imgproc;
+import org.opencv.objdetect.CascadeClassifier;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -42,7 +40,7 @@ public class MainController implements Initializable {
         System.out.println("View is now loaded!");
     }
 
-    public void handleOpenFileButtonAction(ActionEvent actionEvent) throws FileNotFoundException {
+    public void handleOpenFileButtonAction(ActionEvent actionEvent) {
         Node node = (Node) actionEvent.getSource();
 
         FileChooser fileChooser = new FileChooser();
@@ -60,26 +58,41 @@ public class MainController implements Initializable {
 
                 runButton.setDisable(false);
             } catch (IOException ex) {
-                throw new FileNotFoundException();
+                //throw new FileNotFoundException();
             }
         }
     }
 
     public void handleRunButtonAction(ActionEvent actionEvent) {
+        CascadeClassifier faceDetector = new CascadeClassifier(getClass().getResource("/haarcascade_frontalface_alt.xml").getFile().substring(1));
 
         byte[] data = ((DataBufferByte) bufferedImage.getRaster().getDataBuffer()).getData();
         Mat mat = new Mat(bufferedImage.getHeight(), bufferedImage.getWidth(), CvType.CV_8UC3);
         mat.put(0, 0, data);
 
+        // Detect faces in the image.
+        // MatOfRect is a special container class for Rect.
+        MatOfRect faceDetections = new MatOfRect();
+        faceDetector.detectMultiScale(mat, faceDetections);
+        System.out.println(String.format("Detected %s faces", faceDetections.toArray().length));
+
+        // Draw a bounding box around each face.
+        for (Rect rect : faceDetections.toArray()) {
+            Imgproc.rectangle(mat, new Point(rect.x, rect.y), new Point(rect.x + rect.width, rect.y + rect.height), new Scalar(0, 255, 0), 3);
+        }
+
+        // Converting BGR to RGB
         Mat mat1 = new Mat(bufferedImage.getHeight(), bufferedImage.getWidth(), CvType.CV_8UC3);
-        Imgproc.cvtColor(mat, mat1, Imgproc.COLOR_RGB2HSV);
+        Imgproc.cvtColor(mat, mat1, Imgproc.COLOR_RGB2BGR);
 
-        byte[] data1 = new byte[mat1.rows() * mat1.cols() * (int) (mat1.elemSize())];
-        mat1.get(0, 0, data1);
-        BufferedImage bufferedImage1 = new BufferedImage(mat1.cols(), mat1.rows(), 5);
-        bufferedImage1.getRaster().setDataElements(0, 0, mat1.cols(), mat1.rows(), data1);
+        // Converting Mat to BufferedImage
+        data = new byte[bufferedImage.getHeight() * bufferedImage.getWidth() * (int) mat.elemSize()];
+        mat1.get(0, 0, data);
 
-        Image image = SwingFXUtils.toFXImage(bufferedImage1, null);
+        BufferedImage resultBufferedImage = new BufferedImage(mat.cols(), mat.rows(), BufferedImage.TYPE_3BYTE_BGR);
+        resultBufferedImage.getRaster().setDataElements(0, 0, mat.cols(), mat.rows(), data);
+
+        Image image = SwingFXUtils.toFXImage(resultBufferedImage, null);
         imageView1.setImage(image);
     }
 }
