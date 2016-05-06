@@ -8,6 +8,6 @@
    <children>
       <Button fx:id="openFileButton" layoutX="26.0" layoutY="399.0" mnemonicParsing="false" onAction="#handleOpenFileButtonAction" text="Open File" />
       <ImageView fx:id="imageView1" fitHeight="344.0" fitWidth="459.0" layoutX="26.0" layoutY="23.0" pickOnBounds="true" preserveRatio="true" styleClass="imageView" />
-      <Button fx:id="runButton" layoutX="122.0" layoutY="399.0" mnemonicParsing="false" onAction="#handleRunButtonAction" text="Button" />
+      <Button fx:id="runButton" disable="true" layoutX="122.0" layoutY="399.0" mnemonicParsing="false" onAction="#handleRunButtonAction" text="Run" />
    </children>
 </AnchorPane>
