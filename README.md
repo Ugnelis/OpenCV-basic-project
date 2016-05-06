@@ -1,1 +1,2 @@
-# OpenCV-basic-project
+# opencv-basic-project
+
