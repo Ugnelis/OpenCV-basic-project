@@ -1,4 +1,4 @@
-# opencv-basic-project
+# opencv-java-basic-project
 
 ![Screenshot](https://raw.githubusercontent.com/Ugnelis/opencv-basic-project/master/readme/screenshot.png)
 
